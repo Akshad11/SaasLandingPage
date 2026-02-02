@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Helmet } from 'react-helmet-async';
 import { Save } from 'lucide-react';
 
 const SiteSettings = () => {
-    const [settings, setSettings] = useState<any>({});
     const { register, handleSubmit, setValue } = useForm();
     const [message, setMessage] = useState('');
 
@@ -17,7 +16,6 @@ const SiteSettings = () => {
             const res = await fetch('http://localhost:5000/api/cms/settings');
             if (res.ok) {
                 const data = await res.json();
-                setSettings(data);
                 // Pre-fill form
                 Object.keys(data).forEach(key => setValue(key, data[key]));
             }

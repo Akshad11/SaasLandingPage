@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Trash2, PlusCircle, User, Award, Calendar, Heart } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -13,7 +13,7 @@ const AboutManagement = () => {
     const [certs, setCerts] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<SectionType>('team');
     const { register, handleSubmit, reset } = useForm();
-    const { user } = useAuth();
+    const { } = useAuth();
 
     useEffect(() => {
         fetchContent();

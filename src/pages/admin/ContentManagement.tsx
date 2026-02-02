@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from 'react';
+import { } from '../../context/AuthContext';
 import { Trash2, PlusCircle, Star } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';

@@ -1,6 +1,4 @@
-
-import React from 'react';
-import { Heart, Shield, Zap, Users, Lightbulb, TrendingUp } from 'lucide-react';
+import { Users, Heart, Zap, TrendingUp } from 'lucide-react';
 
 const values = [
     { icon: <Heart />, title: "Integrity", desc: "We are honest, transparent, and ethical in everything we do." },
