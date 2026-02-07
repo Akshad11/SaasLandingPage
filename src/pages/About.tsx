@@ -4,8 +4,6 @@ import SEO from '../components/common/SEO';
 import Introduction from '../components/about/Introduction';
 import MissionVision from '../components/about/MissionVision';
 import CoreValues from '../components/about/CoreValues';
-import Leadership from '../components/about/Leadership';
-import Timeline from '../components/about/Timeline';
 import Testimonials from '../components/home/Testimonials';
 import CTA from '../components/home/CTA';
 
@@ -29,8 +27,7 @@ const About: React.FC = () => {
                 <Introduction />
                 <MissionVision />
                 <CoreValues />
-                <Leadership />
-                <Timeline />
+                
                 <Testimonials />
                 <CTA />
             </main>

@@ -25,7 +25,7 @@ const Introduction: React.FC = () => {
                 <div className="relative">
                     <div className="aspect-video bg-surface rounded-2xl overflow-hidden border border-border relative z-10 box-glow">
                         <div className="absolute inset-0 flex items-center justify-center bg-surface">
-                            <span className="text-text-muted">Corporate Office / Team Image</span>
+                            <img src="team.png" alt="" />
                         </div>
                     </div>
                 </div>

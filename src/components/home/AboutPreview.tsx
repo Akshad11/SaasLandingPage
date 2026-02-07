@@ -12,7 +12,7 @@ const AboutPreview: React.FC = () => {
                     <div className="aspect-[4/3] bg-surface rounded-2xl overflow-hidden mb-6 relative z-10">
                         {/* Placeholder */}
                         <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                            <span className="text-muted">Office/Team Image</span>
+                            <img src="office.png" alt="" />
                         </div>
                     </div>
                     <div className="absolute -top-6 -left-6 w-1/2 h-1/2 bg-primary/10 rounded-full blur-[80px]" />
