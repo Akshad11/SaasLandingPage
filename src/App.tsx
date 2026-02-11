@@ -20,7 +20,7 @@ import StaffingDetail from './pages/StaffingDetail';
 import Careers from './pages/Careers';
 import JobDetail from './pages/JobDetail';
 
-// Placeholder Pages
+
 // const Home = () => <div className="pt-32 pb-20 container-custom text-white"><h1>Home Page</h1></div>;
 // const About = () => <div className="pt-32 pb-20 container-custom text-white"><h1>About Page</h1></div>;
 // const Services = () => <div className="pt-32 pb-20 container-custom text-white"><h1>Services Page</h1></div>;
