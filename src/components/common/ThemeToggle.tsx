@@ -6,12 +6,19 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ className }) => {
-    const [isDark, setIsDark] = useState(false);
+    const [isDark, setIsDark] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const savedTheme = localStorage.getItem('theme');
+            return savedTheme === 'dark' || !savedTheme;
+        }
+        return true;
+    });
 
     useEffect(() => {
         // Check local storage or system preference
         const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Default to dark if no saved preference or if saved as dark
+        if (savedTheme === 'dark' || !savedTheme) {
             setIsDark(true);
             document.documentElement.classList.add('dark');
         } else {
