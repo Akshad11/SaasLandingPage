@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Mail, MapPin } from 'lucide-react';
 import ScaleHover from '../common/animations/ScaleHover';
 import StaggerContainer, { StaggerItem } from '../common/animations/StaggerContainer';
 import FadeIn from '../common/animations/FadeIn';
@@ -32,31 +32,7 @@ const Footer: React.FC = () => {
                         <p className="text-text-muted mb-6 text-sm leading-relaxed">
                             We are a service-driven company delivering reliable, efficient solutions across technology and business operations. Our expertise spans IT support, back-office management, financial services, and other essential business functions.
                         </p>
-                        <div className="flex space-x-4">
-                            <ScaleHover>
-                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
-                                    <Facebook size={18} />
-                                </a>
-                            </ScaleHover>
-                            <ScaleHover>
-                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
-                                    {/* X (formerly Twitter) Logo */}
-                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-label="X (formerly Twitter)">
-                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-                                    </svg>
-                                </a>
-                            </ScaleHover>
-                            <ScaleHover>
-                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
-                                    <Instagram size={18} />
-                                </a>
-                            </ScaleHover>
-                            <ScaleHover>
-                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
-                                    <Linkedin size={18} />
-                                </a>
-                            </ScaleHover>
-                        </div>
+
                     </StaggerItem>
 
                     {/* Quick Links */}
@@ -138,14 +114,35 @@ const Footer: React.FC = () => {
                                     Hyderabad, Telangana - 500081</span>
                             </li>
                             <li className="flex items-center space-x-3 text-text-muted hover:text-text transition-colors">
-                                <Phone size={18} className="text-primary flex-shrink-0" />
-                                <span className="text-sm">+91-7060638863</span>
-                            </li>
-                            <li className="flex items-center space-x-3 text-text-muted hover:text-text transition-colors">
                                 <Mail size={18} className="text-primary flex-shrink-0" />
                                 <span className="text-sm">info@aarvionservices.com</span>
                             </li>
                         </ul>
+                        <div className="flex space-x-4 mt-6">
+                            <ScaleHover>
+                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
+                                    <Facebook size={18} />
+                                </a>
+                            </ScaleHover>
+                            <ScaleHover>
+                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
+                                    {/* X (formerly Twitter) Logo */}
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-label="X (formerly Twitter)">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                                    </svg>
+                                </a>
+                            </ScaleHover>
+                            <ScaleHover>
+                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
+                                    <Instagram size={18} />
+                                </a>
+                            </ScaleHover>
+                            <ScaleHover>
+                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
+                                    <Linkedin size={18} />
+                                </a>
+                            </ScaleHover>
+                        </div>
                     </StaggerItem>
                 </StaggerContainer>
             </FadeIn>

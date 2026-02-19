@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import SEO from '../components/common/SEO';
-import { Phone, Mail, Clock, LocateIcon, ExternalLink, Facebook, Instagram, Youtube } from 'lucide-react';
+import { Mail, Clock, LocateIcon, ExternalLink, Facebook, Instagram, Youtube } from 'lucide-react';
 
 
 import PageHero from '../components/common/PageHero';
@@ -174,15 +174,6 @@ const Contact: React.FC = () => {
                             </p>
 
                             <ul className="space-y-6">
-                                <li className="flex items-start">
-                                    <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary mt-1 mr-4 shrink-0 border border-primary/30">
-                                        <Phone size={20} />
-                                    </div>
-                                    <div>
-                                        <span className="block text-sm font-medium text-gray-400 mb-1">Phone</span>
-                                        <span className="text-lg font-semibold text-white">+91-706063-8863</span>
-                                    </div>
-                                </li>
                                 <li className="flex items-start">
                                     <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary mt-1 mr-4 shrink-0 border border-primary/30">
                                         <Mail size={20} />

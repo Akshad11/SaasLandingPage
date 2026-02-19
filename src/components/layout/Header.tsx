@@ -91,7 +91,7 @@ const Header: React.FC = () => {
                         >
                             <Link
                                 to={link.path}
-                                className={`text-sm font-medium transition-colors duration-300 hover:text-primary flex items-center ${location.pathname === link.path
+                                className={`text-md font-medium transition-colors duration-300 hover:text-primary flex items-center ${location.pathname === link.path
                                     ? 'text-primary'
                                     : isScrolled ? 'text-text hover:text-text' : 'text-white hover:text-white'
                                     }`}
