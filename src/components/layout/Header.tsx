@@ -12,6 +12,9 @@ const Header: React.FC = () => {
     const [activeSubDropdown, setActiveSubDropdown] = useState<string | null>(null);
     const location = useLocation();
 
+    // Pages that always have a light background (unscrolled)
+    const isLightPage = ['/login', '/forgot-password', '/reset-password', '/setup'].includes(location.pathname);
+
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50);
@@ -53,6 +56,27 @@ const Header: React.FC = () => {
         { name: 'Contact Us', path: '/contact' },
     ];
 
+    const getLinkColorClass = (path: string) => {
+        const isActive = location.pathname === path;
+        if (isActive) return 'text-primary';
+        
+        if (isScrolled) return 'text-text hover:text-primary';
+        
+        // Unscrolled state
+        if (isLightPage) {
+            return 'text-text dark:text-white hover:text-primary';
+        }
+        
+        // Default (Dark sections like Hero)
+        return 'text-white hover:text-primary';
+    };
+
+    const getIconColorClass = () => {
+        if (isScrolled) return 'text-text';
+        if (isLightPage) return 'text-text dark:text-white';
+        return 'text-white';
+    };
+
     return (
         <header
             className={`fixed w-full z-50 transition-all duration-300 ${isScrolled
@@ -64,18 +88,18 @@ const Header: React.FC = () => {
                 {/* Logo */}
                 <ScaleHover>
                     <Link to="/" className="block relative h-12">
-                        {/* White Logo (logo2.png) - Visible when unscrolled OR in dark mode */}
+                        {/* White Logo (logo2.png) - Visible when unscrolled on dark sections OR in dark mode */}
                         <img
                             src="/logo2.png"
                             alt="Aarvion Services"
-                            className={`h-12 w-auto object-contain transition-opacity duration-300 ${isScrolled ? 'hidden dark:block' : 'block'}`}
+                            className={`h-12 w-auto object-contain transition-opacity duration-300 ${isScrolled ? 'hidden dark:block' : (isLightPage ? 'hidden dark:block' : 'block')}`}
                         />
 
-                        {/* Dark Logo (logo.png) - Visible ONLY when scrolled AND in light mode */}
+                        {/* Dark Logo (logo.png) - Visible on light backgrounds (scrolled OR light pages) */}
                         <img
                             src="/logo.png"
                             alt="Aarvion Services"
-                            className={`h-12 w-auto object-contain transition-opacity duration-300 ${isScrolled ? 'block dark:hidden' : 'hidden'}`}
+                            className={`h-12 w-auto object-contain transition-opacity duration-300 ${isScrolled ? 'block dark:hidden' : (isLightPage ? 'block dark:hidden' : 'hidden')}`}
                         />
                     </Link>
                 </ScaleHover>
@@ -91,10 +115,7 @@ const Header: React.FC = () => {
                         >
                             <Link
                                 to={link.path}
-                                className={`text-md font-medium transition-colors duration-300 hover:text-primary flex items-center ${location.pathname === link.path
-                                    ? 'text-primary'
-                                    : isScrolled ? 'text-text hover:text-text' : 'text-white hover:text-white'
-                                    }`}
+                                className={`text-md font-medium transition-colors duration-300 flex items-center ${getLinkColorClass(link.path)}`}
                             >
                                 {link.name}
                                 {link.dropdown && <ChevronDown size={14} className="ml-1" />}
@@ -156,15 +177,15 @@ const Header: React.FC = () => {
                     ))}
                     <div className="border-l border-border h-6 mx-4"></div>
                     <ScaleHover>
-                        <ThemeToggle className={isScrolled ? undefined : "text-white hover:text-white"} />
+                        <ThemeToggle className={getIconColorClass()} />
                     </ScaleHover>
                 </nav>
 
                 {/* Mobile Menu Button */}
                 <div className="md:hidden flex items-center space-x-4">
-                    <ThemeToggle className={isScrolled ? undefined : "text-white hover:text-white"} />
+                    <ThemeToggle className={getIconColorClass()} />
                     <button
-                        className={isScrolled ? "text-text" : "text-white"}
+                        className={getIconColorClass()}
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? <X size={28} /> : <Menu size={28} />}

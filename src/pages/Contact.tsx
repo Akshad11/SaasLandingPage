@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import SEO from '../components/common/SEO';
-import { Mail, Clock, LocateIcon, ExternalLink, Facebook, Instagram, Youtube } from 'lucide-react';
+import { Mail, Clock, LocateIcon, ExternalLink, Facebook, Instagram, Youtube, Linkedin } from 'lucide-react';
 
 
 import PageHero from '../components/common/PageHero';
@@ -217,6 +217,9 @@ const Contact: React.FC = () => {
                                             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-label="X (formerly Twitter)">
                                                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
                                             </svg>
+                                        </a>
+                                        <a href="https://www.linkedin.com/company/aarvion/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-blue-500 hover:border-blue-500 hover:scale-110 transition-all duration-300 shadow-sm hover:shadow-md hover:bg-white/10">
+                                            <Linkedin size={18} />
                                         </a>
                                         <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-300 hover:text-red-600 hover:border-red-600 hover:scale-110 transition-all duration-300 shadow-sm hover:shadow-md hover:bg-white/10">
                                             <Youtube size={18} />

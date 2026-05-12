@@ -1,255 +1,196 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Code, FileText, TrendingUp, Headphones, Users2, Cpu } from "lucide-react";
+
+import { motion } from "framer-motion";
+import { Code, FileText, TrendingUp, Headphones, Users2, Cpu, ArrowRight, Zap, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const services = [
     {
-        icon: <Code size={32} />,
+        icon: <Code className="w-8 h-8" />,
         title: "IT Support & Outsourcing",
         description:
             "Managed IT services, technical support, helpdesk outsourcing, and remote infrastructure management.",
-        bullets: ["24/7 Helpdesk", "Remote Monitoring", "SLA Driven Delivery"],
-        image: "https://images.unsplash.com/photo-1580894908361-967195033215?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        bullets: ["24/7 Helpdesk Support", "Remote Infrastructure", "SLA Driven Delivery"],
+        image: "https://images.unsplash.com/photo-1580894908361-967195033215?q=80&w=1170&auto=format&fit=crop",
+        color: "from-blue-500 to-cyan-400",
+        delay: 0.1
     },
     {
-        icon: <FileText size={32} />,
+        icon: <FileText className="w-8 h-8" />,
         title: "Back Office Support",
         description:
             "End-to-end back-office operations: data entry, reconciliation, document processing and record management.",
-        bullets: ["Data Processing", "Reconciliation", "Document Management"],
-        image:
-            "https://plus.unsplash.com/premium_photo-1661573764813-a6ae0ea91e37?q=80&w=1932&auto=format&fit=crop",
+        bullets: ["Data & Records", "Financial Reconciliation", "Process Optimization"],
+        image: "https://plus.unsplash.com/premium_photo-1661573764813-a6ae0ea91e37?q=80&w=1932&auto=format&fit=crop",
+        color: "from-purple-500 to-pink-400",
+        delay: 0.2
     },
     {
-        icon: <TrendingUp size={32} />,
+        icon: <TrendingUp className="w-8 h-8" />,
         title: "Financial Services",
         description:
             "Loan assistance, insurance processing support, KYC facilitation and liaison with financial institutions.",
-        bullets: ["KYC Support", "Loan Processing", "Insurance Ops"],
-        image:
-            "https://images.unsplash.com/photo-1612178991541-b48cc8e92a4d?q=80&w=1170&auto=format&fit=crop",
+        bullets: ["KYC Facilitation", "Loan Operations", "Insurance Support"],
+        image: "https://images.unsplash.com/photo-1612178991541-b48cc8e92a4d?q=80&w=1170&auto=format&fit=crop",
+        color: "from-brand-green to-emerald-400",
+        delay: 0.3
     },
     {
-        icon: <Headphones size={32} />,
+        icon: <Headphones className="w-8 h-8" />,
         title: "Customer Support",
         description:
             "Omni-channel customer support solutions — phone, email, chat and ticketing systems with SLA-driven delivery.",
-        bullets: ["Voice + Chat", "Ticketing", "Omnichannel"],
-        image:
-            "https://plus.unsplash.com/premium_photo-1661434914660-c68d9fd54753?q=80&w=1170&auto=format&fit=crop",
+        bullets: ["Omni-channel Support", "Ticketing Systems", "Voice & Chat Ops"],
+        image: "https://plus.unsplash.com/premium_photo-1661434914660-c68d9fd54753?q=80&w=1170&auto=format&fit=crop",
+        color: "from-orange-500 to-amber-400",
+        delay: 0.4
     },
     {
-        icon: <Users2 size={32} />,
+        icon: <Users2 className="w-8 h-8" />,
         title: "Staffing Options",
         description:
             "Recruitment, payroll and HR services for IT, professional and healthcare roles.",
-        bullets: ["IT Staffing", "Payroll", "HR Management"],
-        image: "https://plus.unsplash.com/premium_photo-1661782480332-b13e3172660d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        bullets: ["IT & Prof Staffing", "Payroll Management", "HR Operations"],
+        image: "https://plus.unsplash.com/premium_photo-1661782480332-b13e3172660d?q=80&w=1170&auto=format&fit=crop",
+        color: "from-brand-blue to-indigo-400",
+        delay: 0.5
     },
     {
-        icon: <Cpu size={32} />,
+        icon: <Cpu className="w-8 h-8" />,
         title: "PCB Designing",
         description:
             "Complete schematic and PCB design services with high-quality fabrication meeting Mil Grade and Industrial standards.",
-        bullets: ["Schematic Design", "High-Speed Layout", "Fabrication Support"],
-        image: "https://images.unsplash.com/photo-1697577418970-95d99b5a55cf?q=80&w=996&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        bullets: ["Schematic Layout", "High-Speed Design", "Mil-Grade Standards"],
+        image: "https://images.unsplash.com/photo-1697577418970-95d99b5a55cf?q=80&w=996&auto=format&fit=crop",
+        color: "from-red-500 to-orange-400",
+        delay: 0.6
     },
 ];
 
-const ServicesSnapPage = () => {
-    const sectionsRef = useRef<HTMLDivElement[]>([]);
-    const [activeIndex, setActiveIndex] = useState(0);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    const index = Number(entry.target.getAttribute("data-index"));
-                    if (entry.isIntersecting) setActiveIndex(index);
-                });
-            },
-            { threshold: 0.6 }
-        );
-
-        sectionsRef.current.forEach((section) => {
-            if (section) observer.observe(section);
-        });
-
-        return () => observer.disconnect();
-    }, []);
-
+const ServicesGrid = () => {
     return (
-        <section className="bg-surface">
-            {services.map((service, index) => {
-                const isActive = index === activeIndex;
+        <section className="section-padding relative overflow-hidden bg-background">
+            {/* Background Decorative Elements */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-blue/30 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-green/20 rounded-full blur-[120px]" />
+            </div>
 
-                return (
-                    <div
-                        key={index}
-                        data-index={index}
-                        ref={(el) => {
-                            if (el) sectionsRef.current[index] = el;
-                        }}
-                        className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden"
+            <div className="container-custom relative z-10">
+                <div className="text-center max-w-3xl mx-auto mb-16">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
                     >
-                        {/* 🔲 ANTI-GRAVITY GRID */}
+                        <span className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4 inline-block border border-primary/20">
+                            Our Solutions
+                        </span>
+                        <h2 className="text-4xl md:text-5xl font-bold text-text mb-6">
+                            Tailored Services for <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue to-teal-400">Modern Businesses</span>
+                        </h2>
+                        <p className="text-text-muted text-lg">
+                            From IT infrastructure to financial support, we provide comprehensive services
+                            designed to scale your operations and drive efficiency.
+                        </p>
+                    </motion.div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {services.map((service, index) => (
                         <motion.div
-                            className="absolute inset-0 opacity-[0.06] pointer-events-none z-0"
-                            animate={{ y: [0, -30, 0] }}
-                            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+                            key={index}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ duration: 0.5, delay: service.delay }}
+                            className="group"
                         >
-                            <div
-                                className="w-full h-full"
-                                style={{
-                                    backgroundImage:
-                                        "radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)",
-                                    backgroundSize: "40px 40px",
-                                }}
-                            />
-                        </motion.div>
-
-                        {/* 🔦 FLASHLIGHT (ANTI-GRAVITY FLOAT) */}
-                        <motion.div
-                            className="absolute inset-0 pointer-events-none z-0"
-                            animate={{ y: [0, -40, 0], opacity: [0.12, 0.22, 0.12] }}
-                            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                            style={{
-                                background:
-                                    "radial-gradient(circle at 50% 40%, rgba(255,255,255,0.14), transparent 60%)",
-                                filter: "blur(60px)",
-                            }}
-                        />
-
-                        {/* 🧩 CIRCUIT PATH (FLOAT UP) */}
-                        <motion.svg
-                            className="absolute inset-0 w-full h-full opacity-10 pointer-events-none z-0"
-                            viewBox="0 0 800 600"
-                            fill="none"
-                            animate={{ y: [0, -25, 0] }}
-                            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                            <motion.path
-                                d="M50 300 H250 V200 H450 V350 H650"
-                                stroke="url(#circuitGrad)"
-                                strokeWidth="2"
-                                strokeDasharray="8 6"
-                                animate={{ strokeDashoffset: [0, -40] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                            />
-                            <defs>
-                                <linearGradient id="circuitGrad">
-                                    <stop offset="0%" stopColor="#6366f1" />
-                                    <stop offset="100%" stopColor="#06b6d4" />
-                                </linearGradient>
-                            </defs>
-                        </motion.svg>
-
-                        {/* 🟣 FLOATING LIGHT ORBS (ANTI-GRAVITY) */}
-                        <motion.div
-                            className="absolute top-1/4 right-1/4 w-40 h-40 bg-primary/20 rounded-full blur-2xl z-0"
-                            animate={{ y: [0, -35, 0] }}
-                            transition={{ duration: 10, repeat: Infinity }}
-                        />
-
-                        <motion.div
-                            className="absolute bottom-20 left-1/3 w-16 h-16 bg-secondary/20 rounded-full blur-xl z-0"
-                            animate={{ y: [0, -20, 0] }}
-                            transition={{ duration: 8, repeat: Infinity }}
-                        />
-
-                        {/* 🧩 PARTICLES FLOAT UP */}
-                        {[...Array(8)].map((_, i) => (
-                            <motion.div
-                                key={i}
-                                className="absolute w-1.5 h-1.5 bg-primary/30 rounded-full z-0"
-                                style={{
-                                    top: `${30 + i * 6}%`,
-                                    left: `${10 + i * 10}%`,
-                                }}
-                                animate={{ y: [0, -15, 0] }}
-                                transition={{
-                                    duration: 6 + i,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                }}
-                            />
-                        ))}
-
-                        {/* 🧩 CARD (LOCKED, NO ROTATION) */}
-                        <motion.div
-                            animate={{
-                                scale: isActive ? 1 : 0.92,
-                                opacity: isActive ? 1 : 0.5,
-                            }}
-                            transition={{ duration: 0.5 }}
-                            className="relative z-10 w-full max-w-6xl h-[70vh] rounded-3xl overflow-hidden shadow-2xl isolate transform-none"
-                        >
-                            {/* HUD CORNERS */}
-                            {isActive && (
-                                <>
-                                    <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-primary/60" />
-                                    <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-primary/60" />
-                                    <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-primary/60" />
-                                    <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary/60" />
-                                </>
-                            )}
-
-                            {/* Background */}
-                            <img
-                                src={service.image}
-                                alt={service.title}
-                                className="absolute inset-0 w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/70" />
-
-                            {/* Content */}
-                            <div className="relative z-10 grid md:grid-cols-2 gap-10 p-10 md:p-16 text-white h-full items-center">
-                                <div>
-                                    <div className="mb-4 text-primary">{service.icon}</div>
-                                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                                        {service.title}
-                                    </h2>
-                                    <p className="text-gray-300 mb-6 max-w-xl">
-                                        {service.description}
-                                    </p>
-
-                                    <ul className="space-y-2 text-gray-200">
-                                        {service.bullets.map((b, i) => (
-                                            <li key={i}>• {b}</li>
-                                        ))}
-                                    </ul>
+                            <div className="glass-card h-full flex flex-col p-8 transition-all duration-500 group-hover:translate-y-[-10px] group-hover:shadow-[0_20px_50px_rgba(84,101,255,0.15)] relative overflow-hidden">
+                                {/* Subtle Image Background on Hover */}
+                                <div 
+                                    className="absolute inset-0 bg-cover bg-center opacity-0 group-hover:opacity-[0.03] transition-opacity duration-700 pointer-events-none"
+                                    style={{ backgroundImage: `url(${service.image})` }}
+                                />
+                                
+                                <div className="mb-6 relative">
+                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${service.color} p-0.5 group-hover:rotate-6 transition-transform duration-500`}>
+                                        <div className="w-full h-full bg-surface rounded-[14px] flex items-center justify-center text-primary group-hover:bg-transparent group-hover:text-white transition-all duration-500">
+                                            {service.icon}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Icon Glow */}
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${service.color} blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 -z-10`} />
                                 </div>
 
-                                {/* Glass Popup */}
-                                <AnimatePresence>
-                                    {isActive && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: 60 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 60 }}
-                                            transition={{ duration: 0.4 }}
-                                            className="hidden md:block bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-xl"
-                                        >
-                                            <h4 className="font-semibold mb-2">
-                                                Why choose this service?
-                                            </h4>
-                                            <p className="text-sm text-gray-200 mb-4">
-                                                Optimized workflow, reduced operational costs, and
-                                                scalable delivery tailored to your business.
-                                            </p>
-                                            <button className="px-4 py-2 bg-primary rounded-lg text-sm font-semibold hover:scale-105 transition">
-                                                Enquire Now
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                <h3 className="text-2xl font-bold mb-4 text-text group-hover:text-primary transition-colors duration-300">
+                                    {service.title}
+                                </h3>
+
+                                <p className="text-text-muted mb-8 flex-grow leading-relaxed">
+                                    {service.description}
+                                </p>
+
+                                <div className="space-y-3 mb-8">
+                                    {service.bullets.map((bullet, idx) => (
+                                        <div key={idx} className="flex items-center gap-3">
+                                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-green/10 flex items-center justify-center">
+                                                <CheckCircle2 className="w-3 h-3 text-brand-green" />
+                                            </div>
+                                            <span className="text-sm text-text-muted">{bullet}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <Link
+                                    to="/services"
+                                    className="inline-flex items-center gap-2 font-bold text-primary group/link overflow-hidden relative"
+                                >
+                                    <span className="relative z-10">Explore Service</span>
+                                    <ArrowRight size={18} className="relative z-10 group-hover/link:translate-x-1 transition-transform" />
+                                    
+                                    {/* Animated underline */}
+                                    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-primary transform translate-x-[-100%] group-hover/link:translate-x-0 transition-transform duration-300" />
+                                </Link>
+                                
+                                {/* Decorative Corner Accent */}
+                                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${service.color} opacity-[0.03] group-hover:opacity-10 rounded-bl-[100px] transition-opacity duration-500`} />
                             </div>
                         </motion.div>
+                    ))}
+                </div>
+                
+                {/* Statistics or Trust Badge Footer for the section */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.7 }}
+                    className="mt-20 p-8 rounded-3xl bg-surface/30 backdrop-blur-sm border border-border/50 flex flex-wrap items-center justify-around gap-8 text-center"
+                >
+                    <div className="flex flex-col gap-1">
+                        <span className="text-3xl font-bold text-primary">500+</span>
+                        <span className="text-sm text-text-muted uppercase tracking-wider font-semibold">Clients Served</span>
                     </div>
-                );
-            })}
+                    <div className="w-[1px] h-12 bg-border hidden md:block" />
+                    <div className="flex flex-col gap-1">
+                        <span className="text-3xl font-bold text-primary">24/7</span>
+                        <span className="text-sm text-text-muted uppercase tracking-wider font-semibold">Expert Support</span>
+                    </div>
+                    <div className="w-[1px] h-12 bg-border hidden md:block" />
+                    <div className="flex flex-col gap-1">
+                        <span className="text-3xl font-bold text-primary">99.9%</span>
+                        <span className="text-sm text-text-muted uppercase tracking-wider font-semibold">SLA Success Rate</span>
+                    </div>
+                    <div className="w-[1px] h-12 bg-border hidden md:block" />
+                    <Link to="/contact" className="btn-primary flex items-center gap-2">
+                        Get a Free Audit <Zap size={18} />
+                    </Link>
+                </motion.div>
+            </div>
         </section>
     );
 };
 
-export default ServicesSnapPage;
+export default ServicesGrid;

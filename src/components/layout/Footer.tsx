@@ -138,7 +138,7 @@ const Footer: React.FC = () => {
                                 </a>
                             </ScaleHover>
                             <ScaleHover>
-                                <a href="#" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
+                                <a href="https://www.linkedin.com/company/aarvion/" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-text/5 hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 block">
                                     <Linkedin size={18} />
                                 </a>
                             </ScaleHover>

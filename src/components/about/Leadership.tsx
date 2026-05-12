@@ -26,7 +26,7 @@ const Leadership: React.FC = () => {
                                     <span className="text-text-muted">Leader Image</span>
                                 </div>
                                 <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
-                                    <a href="#" className="bg-white p-2 rounded-full text-primary hover:bg-gray-100"><Linkedin size={20} /></a>
+                                    <a href="https://www.linkedin.com/company/aarvion/" target="_blank" rel="noopener noreferrer" className="bg-white p-2 rounded-full text-primary hover:bg-gray-100"><Linkedin size={20} /></a>
                                     <a href="#" className="bg-white p-2 rounded-full text-primary hover:bg-gray-100"><Twitter size={20} /></a>
                                 </div>
                             </div>
