@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Helmet } from 'react-helmet-async';
-import { 
-    User, 
-    Mail, 
-    Shield, 
-    Lock, 
-    CheckCircle, 
-    AlertCircle, 
-    ChevronRight,
-    Camera,
+import {
+    User,
+    Mail,
+    Shield,
+    Lock,
+    CheckCircle,
+    AlertCircle,
     Save
 } from 'lucide-react';
 
@@ -17,7 +15,7 @@ const ProfileManagement = () => {
     const { user, login } = useAuth();
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateMessage, setUpdateMessage] = useState({ type: '', text: '' });
-    
+
     // Form states
     const [name, setName] = useState(user?.name || '');
     const [newPassword, setNewPassword] = useState('');
@@ -118,11 +116,10 @@ const ProfileManagement = () => {
             </div>
 
             {updateMessage.text && (
-                <div className={`flex items-center p-4 rounded-xl border ${
-                    updateMessage.type === 'success' 
-                        ? 'bg-green-500/10 border-green-500/50 text-green-400' 
+                <div className={`flex items-center p-4 rounded-xl border ${updateMessage.type === 'success'
+                        ? 'bg-green-500/10 border-green-500/50 text-green-400'
                         : 'bg-red-500/10 border-red-500/50 text-red-400'
-                }`}>
+                    }`}>
                     {updateMessage.type === 'success' ? <CheckCircle size={20} className="mr-3" /> : <AlertCircle size={20} className="mr-3" />}
                     <p className="text-sm font-medium">{updateMessage.text}</p>
                 </div>
@@ -145,8 +142,8 @@ const ProfileManagement = () => {
                                     <label className="text-sm font-medium text-text-muted ml-1">Full Name</label>
                                     <div className="relative group">
                                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} />
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                             className="w-full bg-background/50 border border-border rounded-xl pl-11 pr-4 py-3 text-text focus:outline-none focus:border-primary transition-all"
@@ -158,8 +155,8 @@ const ProfileManagement = () => {
                                     <label className="text-sm font-medium text-text-muted ml-1">Email Address</label>
                                     <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-                                        <input 
-                                            type="email" 
+                                        <input
+                                            type="email"
                                             value={user?.email}
                                             disabled
                                             className="w-full bg-background/30 border border-border/50 rounded-xl pl-11 pr-4 py-3 text-text-muted cursor-not-allowed"
@@ -170,7 +167,7 @@ const ProfileManagement = () => {
                             </div>
 
                             <div className="flex justify-end pt-4">
-                                <button 
+                                <button
                                     type="submit"
                                     disabled={isUpdating || name === user?.name}
                                     className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:transform-none disabled:shadow-none"
@@ -203,7 +200,7 @@ const ProfileManagement = () => {
                                     </p>
                                 </div>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setIsPasswordModalOpen(true)}
                                 className="w-full md:w-auto px-6 py-3 rounded-xl border border-border hover:border-primary hover:text-primary font-bold transition-all whitespace-nowrap bg-surface/50"
                             >
@@ -238,7 +235,7 @@ const ProfileManagement = () => {
                         <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-green/20 blur-3xl rounded-full"></div>
 
                         <h3 className="text-lg font-bold text-text mb-6 relative z-10">Access Overview</h3>
-                        
+
                         <div className="space-y-6 relative z-10">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-text-muted">Account Status</span>
@@ -291,8 +288,8 @@ const ProfileManagement = () => {
                                 <label className="text-sm font-medium text-text-muted ml-1">New Password</label>
                                 <div className="relative">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-                                    <input 
-                                        type="password" 
+                                    <input
+                                        type="password"
                                         required
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
@@ -305,8 +302,8 @@ const ProfileManagement = () => {
                                 <label className="text-sm font-medium text-text-muted ml-1">Confirm New Password</label>
                                 <div className="relative">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-                                    <input 
-                                        type="password" 
+                                    <input
+                                        type="password"
                                         required
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
@@ -317,14 +314,14 @@ const ProfileManagement = () => {
                             </div>
 
                             <div className="flex gap-4 pt-2">
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setIsPasswordModalOpen(false)}
                                     className="flex-1 px-4 py-3 rounded-xl border border-border text-text font-bold hover:bg-surface/80 transition-colors"
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <button
                                     type="submit"
                                     disabled={isUpdating || !newPassword || newPassword !== confirmPassword}
                                     className="flex-1 btn-primary py-3 rounded-xl disabled:opacity-50 disabled:transform-none"
