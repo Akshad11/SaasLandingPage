@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserPlus, Mail, Trash2, FileText, Briefcase, Search, Filter, ChevronRight, CheckCircle2, Play, Download } from 'lucide-react';
+import { Users, UserPlus, Mail, Trash2, Briefcase, Search, Filter, CheckCircle2, Play, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SuperAdminDashboard = () => {
@@ -65,7 +65,7 @@ const SuperAdminDashboard = () => {
                     { label: 'General Inquiries', value: stats.inquiries, icon: Mail, color: 'text-brand-green', bg: 'bg-brand-green/10' },
                     { label: 'Job Applications', value: stats.applications, icon: Briefcase, color: 'text-purple-400', bg: 'bg-purple-500/10' },
                 ].map((stat, i) => (
-                    <motion.div 
+                    <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -109,7 +109,7 @@ const SuperAdminDashboard = () => {
                 <div className="flex-1 p-8">
                     <AnimatePresence mode="wait">
                         {activeTab === 'users' ? (
-                            <motion.div 
+                            <motion.div
                                 key="users-tab"
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -154,11 +154,10 @@ const SuperAdminDashboard = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-6">
-                                                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${
-                                                            u.role === 'super-admin' ? 'bg-purple-500/10 text-purple-400' :
+                                                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${u.role === 'super-admin' ? 'bg-purple-500/10 text-purple-400' :
                                                             u.role === 'hr' ? 'bg-brand-green/10 text-brand-green' :
-                                                            'bg-primary/10 text-primary'
-                                                        }`}>
+                                                                'bg-primary/10 text-primary'
+                                                            }`}>
                                                             {u.role.replace('-', ' ')}
                                                         </span>
                                                     </td>
@@ -180,7 +179,7 @@ const SuperAdminDashboard = () => {
                                 </div>
                             </motion.div>
                         ) : (
-                            <motion.div 
+                            <motion.div
                                 key="inbox-tab"
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -205,8 +204,8 @@ const SuperAdminDashboard = () => {
                                     </div>
                                     <div className="relative group w-full md:w-64">
                                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} />
-                                        <input 
-                                            placeholder="Search messages..." 
+                                        <input
+                                            placeholder="Search messages..."
                                             className="w-full bg-surface border border-border/50 rounded-2xl pl-11 pr-4 py-3 text-sm text-text focus:outline-none focus:border-primary/50 transition-all"
                                         />
                                     </div>
@@ -229,7 +228,7 @@ const SuperAdminDashboard = () => {
                                     ) : (
                                         filteredMessages.map((msg: any) => {
                                             const isApp = msg.subject?.toLowerCase().includes('job application');
-                                            
+
                                             // Parsing helper for application links
                                             const extractLink = (text: string, label: string) => {
                                                 if (!text || !text.includes(label)) return null;
@@ -241,16 +240,16 @@ const SuperAdminDashboard = () => {
 
                                             const resumeLink = extractLink(msg.message, 'Resume:');
                                             const videoLink = extractLink(msg.message, 'Video Resume:');
-                                            
+
                                             // Clean message for display (remove the link block)
                                             const displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
 
                                             return (
-                                                <motion.div 
+                                                <motion.div
                                                     layout
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
-                                                    key={msg._id} 
+                                                    key={msg._id}
                                                     className="group bg-surface/40 hover:bg-surface border border-border/30 hover:border-primary/30 p-6 rounded-[2rem] transition-all relative overflow-hidden"
                                                 >
                                                     <div className="flex flex-col md:flex-row justify-between gap-4 relative z-10">
@@ -282,9 +281,9 @@ const SuperAdminDashboard = () => {
                                                             <span className="text-[10px] font-black text-text-muted/60 uppercase tracking-widest">{new Date(msg.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 {isApp && videoLink && (
-                                                                    <a 
-                                                                        href={videoLink} 
-                                                                        target="_blank" 
+                                                                    <a
+                                                                        href={videoLink}
+                                                                        target="_blank"
                                                                         rel="noopener noreferrer"
                                                                         className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-xl text-[10px] font-black hover:scale-105 transition-all uppercase tracking-widest"
                                                                     >
@@ -293,9 +292,9 @@ const SuperAdminDashboard = () => {
                                                                     </a>
                                                                 )}
                                                                 {isApp && resumeLink && (
-                                                                    <a 
-                                                                        href={resumeLink} 
-                                                                        target="_blank" 
+                                                                    <a
+                                                                        href={resumeLink}
+                                                                        target="_blank"
                                                                         rel="noopener noreferrer"
                                                                         className="flex items-center gap-2 px-4 py-2 bg-white/10 text-text rounded-xl text-[10px] font-black hover:bg-white/20 transition-all uppercase tracking-widest border border-white/10"
                                                                     >

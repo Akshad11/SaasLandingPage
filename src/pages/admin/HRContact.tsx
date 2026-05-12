@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Trash2, FileText, Briefcase, Search, Filter, Play, Download, CheckCircle2 } from 'lucide-react';
+import { Mail, Trash2, Briefcase, Search, Filter, Play, Download, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HRContact = () => {
@@ -108,8 +108,8 @@ const HRContact = () => {
                     </div>
                     <div className="relative group w-full md:w-64">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={18} />
-                        <input 
-                            placeholder="Search inbox..." 
+                        <input
+                            placeholder="Search inbox..."
                             className="w-full bg-surface border border-border/50 rounded-2xl pl-11 pr-4 py-3 text-sm text-text focus:outline-none focus:border-primary/50 transition-all"
                         />
                     </div>
@@ -117,7 +117,7 @@ const HRContact = () => {
 
                 <div className="flex-1 p-8">
                     <AnimatePresence mode="wait">
-                        <motion.div 
+                        <motion.div
                             key={inboxCategory}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ const HRContact = () => {
                             ) : (
                                 filteredMessages.map((msg: any) => {
                                     const isApp = msg.subject?.toLowerCase().includes('job application');
-                                    
+
                                     // Parsing helper
                                     const extractLink = (text: string, label: string) => {
                                         if (!text || !text.includes(label)) return null;
@@ -155,11 +155,11 @@ const HRContact = () => {
                                     const displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
 
                                     return (
-                                        <motion.div 
+                                        <motion.div
                                             layout
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            key={msg._id} 
+                                            key={msg._id}
                                             className="group bg-surface/40 hover:bg-surface border border-border/30 hover:border-primary/30 p-6 rounded-[2rem] transition-all relative overflow-hidden"
                                         >
                                             <div className="flex flex-col md:flex-row justify-between gap-4 relative z-10">
@@ -191,9 +191,9 @@ const HRContact = () => {
                                                     <span className="text-[10px] font-black text-text-muted/60 uppercase tracking-widest">{new Date(msg.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         {isApp && videoLink && (
-                                                            <a 
-                                                                href={videoLink} 
-                                                                target="_blank" 
+                                                            <a
+                                                                href={videoLink}
+                                                                target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="flex items-center gap-2 px-4 py-2 bg-primary text-black rounded-xl text-[10px] font-black hover:scale-105 transition-all uppercase tracking-widest"
                                                             >
@@ -202,9 +202,9 @@ const HRContact = () => {
                                                             </a>
                                                         )}
                                                         {isApp && resumeLink && (
-                                                            <a 
-                                                                href={resumeLink} 
-                                                                target="_blank" 
+                                                            <a
+                                                                href={resumeLink}
+                                                                target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="flex items-center gap-2 px-4 py-2 bg-white/10 text-text rounded-xl text-[10px] font-black hover:bg-white/20 transition-all uppercase tracking-widest border border-white/10"
                                                             >
