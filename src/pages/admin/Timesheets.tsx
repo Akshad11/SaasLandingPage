@@ -254,7 +254,7 @@ const Timesheets = () => {
                         className="flex items-center gap-2 bg-surface border border-border/50 text-text px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:border-primary/50 transition-all"
                     >
                         <Download size={16} className="text-primary" />
-                        Export Center
+                        {isSuperAdmin ? "Export Center" : "Export Month"}
                     </motion.button>
                     {!isSuperAdmin && (
                         <motion.button
@@ -264,7 +264,7 @@ const Timesheets = () => {
                             className="flex items-center gap-2 bg-cta-gradient text-black px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20"
                         >
                             <Plus size={18} />
-                            Log Progress
+                            Add Work Log
                         </motion.button>
                     )}
                 </div>
@@ -305,9 +305,9 @@ const Timesheets = () => {
 
             {/* Main Layout */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                {/* Left: Sidebar Navigation (User List & Calendar) */}
+                {/* Left: Sidebar Navigation */}
                 <div className="xl:col-span-3 space-y-6">
-                    {/* Calendar Mini-View */}
+                    {/* Calendar Mini-View (Always show for everyone now) */}
                     <div className="glass-card p-6 border border-border/50">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-[10px] font-black text-text-muted uppercase tracking-widest flex items-center gap-2">
@@ -337,7 +337,7 @@ const Timesheets = () => {
                                 return (
                                     <button 
                                         key={d}
-                                        onClick={() => { setSelectedDay(dateStr); setSelectedUser('all'); }}
+                                        onClick={() => { setSelectedDay(dateStr); isSuperAdmin && setSelectedUser('all'); }}
                                         className={`h-7 w-7 rounded-lg text-[10px] font-bold transition-all
                                             ${isSelected ? 'bg-primary text-black' : hasEntry ? 'text-primary' : isHoliday ? 'text-orange-500' : isPending ? 'text-red-500' : 'text-text-muted'}
                                         `}
@@ -352,7 +352,7 @@ const Timesheets = () => {
                         </p>
                     </div>
 
-                    {/* Team Members List (Only SuperAdmin) */}
+                    {/* Team Members List (Only for SuperAdmin) */}
                     {isSuperAdmin && (
                         <div className="glass-card border border-border/50 overflow-hidden">
                             <div className="p-4 bg-surface/50 border-b border-border/50">
@@ -392,33 +392,41 @@ const Timesheets = () => {
                     )}
                 </div>
 
-                {/* Right: Content Area (Daily Feed or User Sheet) */}
+                {/* Content Area */}
                 <div className="xl:col-span-9 space-y-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <div className="p-3 bg-surface border border-border/50 rounded-2xl">
-                                {selectedUser === 'all' ? <CalendarIcon className="text-primary" /> : <UserIcon className="text-primary" />}
+                                {isSuperAdmin ? (selectedUser === 'all' ? <CalendarIcon className="text-primary" /> : <UserIcon className="text-primary" />) : <FileSpreadsheet className="text-primary" />}
                             </div>
                             <div>
                                 <h2 className="text-xl font-black text-text uppercase tracking-widest">
-                                    {selectedUser === 'all' ? `Updates for ${new Date(selectedDay).toLocaleDateString()}` : `${users.find(u => u.id === selectedUser)?.name}'s Sheet`}
+                                    {isSuperAdmin ? (selectedUser === 'all' ? `Updates for ${new Date(selectedDay).toLocaleDateString()}` : `${users.find(u => u.id === selectedUser)?.name}'s Sheet`) : "My Activity Log"}
                                 </h2>
                                 <p className="text-xs text-text-muted font-bold uppercase tracking-tighter">
-                                    {selectedUser === 'all' ? "Reviewing all team progress for the day" : `Complete monthly log for ${currentDate.toLocaleString('default', { month: 'long' })}`}
+                                    {isSuperAdmin ? (selectedUser === 'all' ? "Reviewing all team progress for the day" : `Complete monthly log for ${currentDate.toLocaleString('default', { month: 'long' })}`) : `Monthly record for ${currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}`}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="relative flex-1 max-w-xs">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
-                            <input 
-                                type="text" 
-                                placeholder="Search in logs..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-surface/30 border border-border/50 rounded-xl py-3 pl-11 pr-4 text-xs font-medium focus:border-primary outline-none"
-                            />
-                        </div>
+                        {!isSuperAdmin && (
+                            <div className="flex items-center gap-2">
+                                <button onClick={handlePrevMonth} className="p-2 hover:text-primary transition-colors bg-surface border border-border/50 rounded-xl"><ChevronLeft size={16} /></button>
+                                <span className="text-xs font-black uppercase px-4">{currentDate.toLocaleString('default', { month: 'short', year: 'numeric' })}</span>
+                                <button onClick={handleNextMonth} className="p-2 hover:text-primary transition-colors bg-surface border border-border/50 rounded-xl"><ChevronRight size={16} /></button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="relative flex-1 max-w-xs mt-6">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
+                        <input 
+                            type="text" 
+                            placeholder="Search in logs..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-surface/30 border border-border/50 rounded-xl py-3 pl-11 pr-4 text-xs font-medium focus:border-primary outline-none"
+                        />
                     </div>
 
                     {/* Feed Section */}
@@ -428,15 +436,15 @@ const Timesheets = () => {
                                 <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
                                 <p className="text-xs font-black text-text-muted uppercase tracking-widest">Syncing Data...</p>
                             </div>
-                        ) : (selectedUser === 'all' ? dailyEntries : filteredEntries).length === 0 ? (
+                        ) : (isSuperAdmin ? (selectedUser === 'all' ? dailyEntries : filteredEntries) : entries).length === 0 ? (
                             <div className="py-32 text-center glass-card border-dashed border-border/50 flex flex-col items-center">
                                 <FileSpreadsheet size={48} className="text-text-muted/20 mb-6" />
                                 <h3 className="text-lg font-black text-text uppercase tracking-widest">No Records Found</h3>
-                                <p className="text-text-muted text-xs mt-2 font-medium">There are no updates logged for this selection.</p>
+                                <p className="text-text-muted text-xs mt-2 font-medium">There are no updates logged for this month.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-6">
-                                {(selectedUser === 'all' ? dailyEntries : filteredEntries)
+                                {(isSuperAdmin ? (selectedUser === 'all' ? dailyEntries : filteredEntries) : entries)
                                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                                     .map((entry, idx) => (
                                     <motion.div
@@ -449,25 +457,34 @@ const Timesheets = () => {
                                         <div className="flex flex-col lg:flex-row gap-6">
                                             {/* Left Meta info */}
                                             <div className="lg:w-48 shrink-0 space-y-4 border-r border-border/20 pr-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-2xl bg-cta-gradient flex items-center justify-center text-black font-black text-sm">
-                                                        {entry.userName.charAt(0)}
+                                                {isSuperAdmin ? (
+                                                    <>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-2xl bg-cta-gradient flex items-center justify-center text-black font-black text-sm">
+                                                                {entry.userName.charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-xs font-black text-text uppercase tracking-tighter truncate w-24">{entry.userName}</p>
+                                                                <p className="text-[9px] font-black text-text-muted uppercase tracking-widest">{entry.userRole}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
+                                                                <CalendarIcon size={12} className="text-primary" />
+                                                                {new Date(entry.date).toLocaleDateString()}
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
+                                                                <Clock size={12} className="text-primary" />
+                                                                {new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-xs font-black text-primary uppercase tracking-widest">
+                                                        <CalendarIcon size={14} />
+                                                        {new Date(entry.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                     </div>
-                                                    <div>
-                                                        <p className="text-xs font-black text-text uppercase tracking-tighter truncate w-24">{entry.userName}</p>
-                                                        <p className="text-[9px] font-black text-text-muted uppercase tracking-widest">{entry.userRole}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
-                                                        <CalendarIcon size={12} className="text-primary" />
-                                                        {new Date(entry.date).toLocaleDateString()}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted">
-                                                        <Clock size={12} className="text-primary" />
-                                                        {new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </div>
+                                                )}
                                             </div>
 
                                             {/* Right Content */}
@@ -519,50 +536,65 @@ const Timesheets = () => {
                             </div>
 
                             <div className="grid grid-cols-1 gap-4">
-                                <button 
-                                    onClick={() => { generateExcel(entries, `Full_Month_${currentDate.getFullYear()}_${currentDate.getMonth()+1}.xlsx`); setShowExportModal(false); }}
-                                    className="flex items-center gap-4 p-5 bg-surface border border-border/50 rounded-2xl hover:border-primary/50 transition-all text-left"
-                                >
-                                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><FileSpreadsheet size={24} /></div>
-                                    <div>
-                                        <p className="text-sm font-black text-text uppercase">Full Monthly Sheet</p>
-                                        <p className="text-[10px] text-text-muted font-bold italic">Includes every log from all users for the current month.</p>
-                                    </div>
-                                </button>
-
-                                <div className="space-y-3">
-                                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Specific Reports</p>
-                                    <div className="grid grid-cols-2 gap-3">
+                                {isSuperAdmin ? (
+                                    <>
                                         <button 
-                                            onClick={() => { generateExcel(entries.filter(e => e.userRole === 'admin'), 'Admin_Logs.xlsx'); setShowExportModal(false); }}
-                                            className="p-4 bg-surface/50 border border-border/30 rounded-2xl hover:border-primary/50 transition-all text-center"
+                                            onClick={() => { generateExcel(entries, `Full_Month_${currentDate.getFullYear()}_${currentDate.getMonth()+1}.xlsx`); setShowExportModal(false); }}
+                                            className="flex items-center gap-4 p-5 bg-surface border border-border/50 rounded-2xl hover:border-primary/50 transition-all text-left"
                                         >
-                                            <Briefcase size={20} className="mx-auto text-primary mb-2" />
-                                            <p className="text-[10px] font-black text-text uppercase">Admins Only</p>
+                                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><FileSpreadsheet size={24} /></div>
+                                            <div>
+                                                <p className="text-sm font-black text-text uppercase">Full Monthly Sheet</p>
+                                                <p className="text-[10px] text-text-muted font-bold italic">Includes every log from all users for the current month.</p>
+                                            </div>
                                         </button>
-                                        <button 
-                                            onClick={() => { generateExcel(entries.filter(e => e.userRole === 'hr'), 'HR_Logs.xlsx'); setShowExportModal(false); }}
-                                            className="p-4 bg-surface/50 border border-border/30 rounded-2xl hover:border-primary/50 transition-all text-center"
-                                        >
-                                            <UserIcon size={20} className="mx-auto text-primary mb-2" />
-                                            <p className="text-[10px] font-black text-text uppercase">HR Only</p>
-                                        </button>
-                                    </div>
-                                </div>
 
-                                {selectedUser !== 'all' && (
+                                        <div className="space-y-3">
+                                            <p className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Specific Reports</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button 
+                                                    onClick={() => { generateExcel(entries.filter(e => e.userRole === 'admin'), 'Admin_Logs.xlsx'); setShowExportModal(false); }}
+                                                    className="p-4 bg-surface/50 border border-border/30 rounded-2xl hover:border-primary/50 transition-all text-center"
+                                                >
+                                                    <Briefcase size={20} className="mx-auto text-primary mb-2" />
+                                                    <p className="text-[10px] font-black text-text uppercase">Admins Only</p>
+                                                </button>
+                                                <button 
+                                                    onClick={() => { generateExcel(entries.filter(e => e.userRole === 'hr'), 'HR_Logs.xlsx'); setShowExportModal(false); }}
+                                                    className="p-4 bg-surface/50 border border-border/30 rounded-2xl hover:border-primary/50 transition-all text-center"
+                                                >
+                                                    <UserIcon size={20} className="mx-auto text-primary mb-2" />
+                                                    <p className="text-[10px] font-black text-text uppercase">HR Only</p>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {selectedUser !== 'all' && (
+                                            <button 
+                                                onClick={() => { 
+                                                    const uEntries = entries.filter(e => e.userId === selectedUser);
+                                                    generateExcel(uEntries, `${uEntries[0]?.userName}_Report.xlsx`); 
+                                                    setShowExportModal(false); 
+                                                }}
+                                                className="flex items-center gap-4 p-5 bg-primary/10 border border-primary/20 rounded-2xl hover:bg-primary/20 transition-all text-left"
+                                            >
+                                                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-black font-black"><FileText size={24} /></div>
+                                                <div>
+                                                    <p className="text-sm font-black text-text uppercase">Selected User Export</p>
+                                                    <p className="text-[10px] text-text-muted font-bold italic">Download full history for {users.find(u => u.id === selectedUser)?.name}</p>
+                                                </div>
+                                            </button>
+                                        )}
+                                    </>
+                                ) : (
                                     <button 
-                                        onClick={() => { 
-                                            const uEntries = entries.filter(e => e.userId === selectedUser);
-                                            generateExcel(uEntries, `${uEntries[0]?.userName}_Report.xlsx`); 
-                                            setShowExportModal(false); 
-                                        }}
-                                        className="flex items-center gap-4 p-5 bg-primary/10 border border-primary/20 rounded-2xl hover:bg-primary/20 transition-all text-left"
+                                        onClick={() => { generateExcel(entries, `My_Timesheet_${currentDate.toLocaleString('default', { month: 'short' })}_${currentDate.getFullYear()}.xlsx`); setShowExportModal(false); }}
+                                        className="flex items-center gap-4 p-6 bg-cta-gradient border border-primary/20 rounded-2xl shadow-xl shadow-primary/10 transition-all text-left"
                                     >
-                                        <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-black font-black"><FileText size={24} /></div>
+                                        <div className="w-14 h-14 rounded-xl bg-black/10 flex items-center justify-center text-black"><FileSpreadsheet size={28} /></div>
                                         <div>
-                                            <p className="text-sm font-black text-text uppercase">Selected User Export</p>
-                                            <p className="text-[10px] text-text-muted font-bold italic">Download full history for {users.find(u => u.id === selectedUser)?.name}</p>
+                                            <p className="text-md font-black text-black uppercase tracking-tight">Export My {currentDate.toLocaleString('default', { month: 'long' })} Log</p>
+                                            <p className="text-[10px] text-black/60 font-black uppercase tracking-widest mt-1">Generate professional Excel report for your records</p>
                                         </div>
                                     </button>
                                 )}
