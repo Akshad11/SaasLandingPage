@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserPlus, Mail, Trash2, Briefcase, Search, Filter, CheckCircle2, Play, Download, Printer, X } from 'lucide-react';
+import { Users, UserPlus, Mail, Trash2, Briefcase, Search, Filter, CheckCircle2, Play, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SuperAdminDashboard = () => {
@@ -11,7 +11,6 @@ const SuperAdminDashboard = () => {
     const [inboxCategory, setInboxCategory] = useState<'all' | 'inquiries' | 'applications'>('all');
     const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState({ users: 0, inquiries: 0, applications: 0 });
-    const [workingDays, setWorkingDays] = useState<number[]>([]);
 
     useEffect(() => {
         if (user) setUsers([user]);
@@ -23,11 +22,10 @@ const SuperAdminDashboard = () => {
                 const headers = { Authorization: `Bearer ${token}` };
                 
                 // Fetch Stats & Data
-                const [statsRes, contactRes, appRes, holidayRes] = await Promise.all([
+                const [statsRes, contactRes, appRes] = await Promise.all([
                     fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cms/stats`, { headers }),
                     fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),
-                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications`, { headers }),
-                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cms/working-days`, { headers })
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications`, { headers })
                 ]);
 
                 if (statsRes.ok) {
@@ -53,13 +51,6 @@ const SuperAdminDashboard = () => {
                 setMessages(combined.sort((a: any, b: any) => 
                     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                 ));
-
-                    if (holidayRes.ok) {
-                    const data = await holidayRes.json();
-                    if (data.data && data.data.workingDays) {
-                        setWorkingDays(data.data.workingDays);
-                    }
-                }
             } catch (error) {
                 console.error("Failed to fetch dashboard data", error);
             } finally {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { BarChart3, Briefcase, Users, Mail, Play, Download, Trash2, ArrowRight, Printer } from 'lucide-react';
+import { BarChart3, Briefcase, Users, Mail, Play, Download, Trash2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -79,21 +79,6 @@ const HRDashboard = () => {
             console.error("Download failed:", error);
             return false;
         }
-    };
-
-    // Parsing helper for application links
-    const extractLink = (text: string, label: string) => {
-        if (!text || !text.includes(label)) return null;
-        const parts = text.split(label);
-        if (parts.length < 2) return null;
-        let link = parts[1].split('\n')[0].trim();
-        
-        // Enhance Cloudinary links to force download
-        if (link.includes('res.cloudinary.com')) {
-            link = link.replace('/upload/', '/upload/fl_attachment/');
-        }
-        
-        return (link && link !== 'Not provided' && link.startsWith('http')) ? link : null;
     };
 
     return (

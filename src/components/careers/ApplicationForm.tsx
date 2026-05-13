@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Upload, CheckCircle, AlertCircle, HelpCircle, FileText, X } from 'lucide-react';
+import { Upload, CheckCircle, AlertCircle, HelpCircle, FileText } from 'lucide-react';
 
 type FormData = {
     name: string;

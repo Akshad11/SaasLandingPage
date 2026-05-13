@@ -6,11 +6,8 @@ import {
     Search, 
     Calendar as CalendarIcon, 
     Trash2, 
-    CheckCircle2, 
-    AlertCircle,
+    CheckCircle2,
     ChevronRight,
-    Send,
-    Filter,
     Download,
     ChevronLeft,
     FileSpreadsheet,
@@ -19,7 +16,6 @@ import {
     User as UserIcon,
     Briefcase,
     Users,
-    ChevronDown,
     FileText,
     History
 } from 'lucide-react';
@@ -50,7 +46,7 @@ const Timesheets = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState(new Date().toDateString());
     const [selectedUser, setSelectedUser] = useState<string | 'all'>('all');
-    const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'hr'>('all');
+    const [filterRole] = useState<'all' | 'admin' | 'hr'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [workingDays, setWorkingDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
     const [holidays, setHolidays] = useState<any[]>([]);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Trash2, Briefcase, Search, Filter, Play, Download, CheckCircle2, Printer } from 'lucide-react';
+import { Mail, Trash2, Briefcase, Search, Filter, Play, Download, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HRContact = () => {
@@ -37,14 +37,14 @@ const HRContact = () => {
         };
         fetchData();
     }, []);
-    
+
     const handleDownload = async (id: string, applicantName: string) => {
         try {
             const token = localStorage.getItem('token');
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications/download/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             if (!res.ok) return false;
 
             const blob = await res.blob();
@@ -178,7 +178,7 @@ const HRContact = () => {
                             ) : (
                                 filteredMessages.map((msg: any) => {
                                     const isApp = msg.modelType === 'application' || msg.subject?.toLowerCase().includes('job application');
-                                    
+
                                     // New model fields or legacy parsed fields
                                     let resumeLink = msg.resumeUrl || null;
                                     let videoLink = msg.videoResumeLink || null;
