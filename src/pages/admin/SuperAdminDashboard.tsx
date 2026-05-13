@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Users, UserPlus, Mail, Trash2, Briefcase, Search, Filter, CheckCircle2, Play, Download } from 'lucide-react';
+import { Users, UserPlus, Mail, Trash2, Briefcase, Search, Filter, CheckCircle2, Play, Download, Printer, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SuperAdminDashboard = () => {
@@ -10,30 +10,89 @@ const SuperAdminDashboard = () => {
     const [activeTab, setActiveTab] = useState<'users' | 'inbox'>('users');
     const [inboxCategory, setInboxCategory] = useState<'all' | 'inquiries' | 'applications'>('all');
     const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState({ users: 0, inquiries: 0, applications: 0 });
+    const [workingDays, setWorkingDays] = useState<number[]>([]);
 
     useEffect(() => {
         if (user) setUsers([user]);
 
-        const fetchMessages = async () => {
+        const fetchData = async () => {
             setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const messagesArray = Array.isArray(data) ? data : (data.contacts || data.data || []);
-                    setMessages(messagesArray);
+                const headers = { Authorization: `Bearer ${token}` };
+                
+                // Fetch Stats & Data
+                const [statsRes, contactRes, appRes, holidayRes] = await Promise.all([
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cms/stats`, { headers }),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications`, { headers }),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cms/working-days`, { headers })
+                ]);
+
+                if (statsRes.ok) {
+                    const data = await statsRes.json();
+                    setStats(prev => ({ ...prev, users: data.users || 0 }));
+                }
+
+                let combined: any[] = [];
+                if (contactRes.ok) {
+                    const data = await contactRes.json();
+                    const contactsArr = Array.isArray(data) ? data : (data.contacts || data.data || []);
+                    combined = [...combined, ...contactsArr.map((c: any) => ({ ...c, modelType: 'inquiry' }))];
+                    setStats(prev => ({ ...prev, inquiries: contactsArr.length }));
+                }
+
+                if (appRes.ok) {
+                    const data = await appRes.json();
+                    const appsArr = Array.isArray(data) ? data : (data.applications || data.data || []);
+                    combined = [...combined, ...appsArr.map((a: any) => ({ ...a, modelType: 'application' }))];
+                    setStats(prev => ({ ...prev, applications: appsArr.length }));
+                }
+
+                setMessages(combined.sort((a: any, b: any) => 
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                ));
+
+                    if (holidayRes.ok) {
+                    const data = await holidayRes.json();
+                    if (data.data && data.data.workingDays) {
+                        setWorkingDays(data.data.workingDays);
+                    }
                 }
             } catch (error) {
-                console.error("Failed to fetch messages", error);
+                console.error("Failed to fetch dashboard data", error);
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchMessages();
+        fetchData();
     }, [user]);
+
+    const handleDownload = async (id: string, applicantName: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications/download/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (!res.ok) return false;
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${applicantName.replace(/\s+/g, '_')}_Resume.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            return true;
+        } catch (error) {
+            console.error("Download failed:", error);
+            return false;
+        }
+    };
 
     const filteredMessages = messages.filter(msg => {
         const isApp = msg.subject?.toLowerCase().includes('job application');
@@ -42,11 +101,6 @@ const SuperAdminDashboard = () => {
         return true;
     });
 
-    const stats = {
-        users: users.length,
-        inquiries: messages.filter(m => !m.subject?.toLowerCase().includes('job application')).length,
-        applications: messages.filter(m => m.subject?.toLowerCase().includes('job application')).length
-    };
 
     return (
         <div className="space-y-8 pb-12">
@@ -226,23 +280,36 @@ const SuperAdminDashboard = () => {
                                             <p className="text-text-muted text-sm mt-1">Try adjusting your filters or search query.</p>
                                         </div>
                                     ) : (
-                                        filteredMessages.map((msg: any) => {
-                                            const isApp = msg.subject?.toLowerCase().includes('job application');
+                                        messages.filter(m => {
+                                            const isApp = m.modelType === 'application' || m.subject?.toLowerCase().includes('job application');
+                                            if (inboxCategory === 'applications') return isApp;
+                                            if (inboxCategory === 'inquiries') return !isApp;
+                                            return true;
+                                        }).map((msg: any) => {
+                                            const isApp = msg.modelType === 'application' || msg.subject?.toLowerCase().includes('job application');
 
-                                            // Parsing helper for application links
-                                            const extractLink = (text: string, label: string) => {
-                                                if (!text || !text.includes(label)) return null;
-                                                const parts = text.split(label);
-                                                if (parts.length < 2) return null;
-                                                const link = parts[1].split('\n')[0].trim();
-                                                return (link && link !== 'Not provided' && link.startsWith('http')) ? link : null;
-                                            };
+                                            // New model fields or legacy parsed fields
+                                            let resumeLink = msg.resumeUrl || null;
+                                            let videoLink = msg.videoResumeLink || null;
+                                            let position = msg.position || null;
+                                            let displayMessage = msg.message;
+                                            let subject = msg.subject || (position ? `Job Application: ${position}` : 'No Subject');
 
-                                            const resumeLink = extractLink(msg.message, 'Resume:');
-                                            const videoLink = extractLink(msg.message, 'Video Resume:');
+                                            // Legacy parsing if it's a legacy application in the Contact model
+                                            if (msg.modelType === 'inquiry' && isApp) {
+                                                const extractLegacyLink = (text: string, label: string) => {
+                                                    if (!text || !text.includes(label)) return null;
+                                                    const parts = text.split(label);
+                                                    return parts[1].split('\n')[0].trim();
+                                                };
+                                                resumeLink = extractLegacyLink(msg.message, 'Resume:');
+                                                videoLink = extractLegacyLink(msg.message, 'Video Resume:');
+                                                displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
+                                            }
 
-                                            // Clean message for display (remove the link block)
-                                            const displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
+                                            if (resumeLink && resumeLink.includes('res.cloudinary.com') && !resumeLink.includes('/raw/')) {
+                                                resumeLink = resumeLink.replace('/upload/', '/upload/fl_attachment/');
+                                            }
 
                                             return (
                                                 <motion.div
@@ -259,7 +326,7 @@ const SuperAdminDashboard = () => {
                                                             </div>
                                                             <div className="space-y-1">
                                                                 <div className="flex items-center gap-3">
-                                                                    <h3 className="font-black text-text text-lg tracking-tight leading-tight">{msg.subject || 'No Subject'}</h3>
+                                                                    <h3 className="font-black text-text text-lg tracking-tight leading-tight">{subject}</h3>
                                                                     <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${isApp ? 'bg-purple-500/10 text-purple-400' : 'bg-brand-green/10 text-brand-green'}`}>
                                                                         {isApp ? 'Application' : 'Inquiry'}
                                                                     </span>
@@ -280,7 +347,7 @@ const SuperAdminDashboard = () => {
                                                         <div className="flex md:flex-col items-center md:items-end justify-between md:justify-start gap-4">
                                                             <span className="text-[10px] font-black text-text-muted/60 uppercase tracking-widest">{new Date(msg.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                {isApp && videoLink && (
+                                                                {isApp && videoLink && videoLink !== 'Not provided' && (
                                                                     <a
                                                                         href={videoLink}
                                                                         target="_blank"
@@ -292,21 +359,24 @@ const SuperAdminDashboard = () => {
                                                                     </a>
                                                                 )}
                                                                 {isApp && resumeLink && (
-                                                                    <a
-                                                                        href={resumeLink}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            if (msg.modelType === 'application') {
+                                                                                const success = await handleDownload(msg._id, msg.name);
+                                                                                if (!success) window.open(resumeLink, '_blank');
+                                                                            } else {
+                                                                                window.open(resumeLink, '_blank');
+                                                                            }
+                                                                        }}
                                                                         className="flex items-center gap-2 px-4 py-2 bg-white/10 text-text rounded-xl text-[10px] font-black hover:bg-white/20 transition-all uppercase tracking-widest border border-white/10"
                                                                     >
                                                                         <Download size={14} />
                                                                         Resume
-                                                                    </a>
-                                                                )}
-                                                                {!isApp && (
-                                                                    <button className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
-                                                                        <Trash2 size={16} />
                                                                     </button>
                                                                 )}
+                                                                <button className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                                                                    <Trash2 size={16} />
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>

@@ -47,6 +47,8 @@ import HRPostJob from './pages/admin/HRPostJob';
 import HRContact from './pages/admin/HRContact';
 import AnalyticsDashboard from './pages/admin/AnalyticsDashboard';
 import ProfileManagement from './pages/admin/ProfileManagement';
+import Timesheets from './pages/admin/Timesheets';
+import HolidayManagement from './pages/admin/HolidayManagement';
 
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -70,12 +72,15 @@ function App() {
               <Route path="/admin/settings" element={<SiteSettings />} />
               <Route path="/admin/inbox" element={<SuperAdminDashboard />} />
               <Route path="/admin/profile" element={<ProfileManagement />} />
+              <Route path="/admin/timesheets" element={<Timesheets />} />
+              <Route path="/admin/holidays" element={<HolidayManagement />} />
 
               <Route path="/hr/dashboard" element={<HRDashboard />} />
               <Route path="/hr/jobs" element={<HRJobs />} />
               <Route path="/hr/jobs/new" element={<HRPostJob />} />
               <Route path="/hr/contact" element={<HRContact />} />
               <Route path="/hr/profile" element={<ProfileManagement />} />
+              <Route path="/hr/timesheets" element={<Timesheets />} />
             </Route>
 
             {/* Public Pages Layout */}

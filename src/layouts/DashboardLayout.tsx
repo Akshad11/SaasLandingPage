@@ -13,7 +13,9 @@ import {
     BarChart3,
     PlusCircle,
     User,
-    ChevronRight
+    ChevronRight,
+    Clock,
+    CalendarRange
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -55,6 +57,18 @@ const sidebarItems: SidebarItem[] = [
         roles: ['super-admin', 'admin']
     },
     {
+        name: 'Timesheet',
+        path: '/admin/timesheets',
+        icon: <Clock size={20} />,
+        roles: ['super-admin', 'admin']
+    },
+    {
+        name: 'Holiday Settings',
+        path: '/admin/holidays',
+        icon: <CalendarRange size={20} />,
+        roles: ['super-admin']
+    },
+    {
         name: 'Site Settings',
         path: '/admin/settings',
         icon: <BarChart3 size={20} />,
@@ -82,6 +96,12 @@ const sidebarItems: SidebarItem[] = [
         name: 'Dashboard',
         path: '/hr/dashboard',
         icon: <BarChart3 size={20} />,
+        roles: ['hr']
+    },
+    {
+        name: 'Timesheet',
+        path: '/hr/timesheets',
+        icon: <Clock size={20} />,
         roles: ['hr']
     },
     {

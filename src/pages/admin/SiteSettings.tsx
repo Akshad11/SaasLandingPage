@@ -107,6 +107,26 @@ const SiteSettings = () => {
                     </div>
                 </div>
 
+                {/* Infrastructure Settings */}
+                <div className="bg-surface p-6 rounded-xl border border-border">
+                    <h2 className="text-xl font-bold text-text mb-4 border-b border-border pb-2">Infrastructure</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm text-text-muted mb-1">Resume Storage Mode</label>
+                            <select 
+                                {...register('resume_storage_mode')} 
+                                className="w-full bg-background border border-border rounded p-2 text-text focus:outline-none focus:border-primary"
+                            >
+                                <option value="cloudinary">Cloudinary (Optimized Cloud Storage)</option>
+                                <option value="mongodb">MongoDB Bytes (Direct Database Storage)</option>
+                            </select>
+                            <p className="text-[10px] text-text-muted mt-2">
+                                * MongoDB storage saves resumes directly as bytes. Max file size: 16MB.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <button type="submit" className="btn-primary w-full md:w-auto px-8 py-3 rounded-lg font-bold text-black flex items-center justify-center">
                     <Save className="mr-2" size={20} /> Save Changes
                 </button>

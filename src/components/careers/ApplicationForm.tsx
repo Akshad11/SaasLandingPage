@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Upload, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react';
+import { Upload, CheckCircle, AlertCircle, HelpCircle, FileText, X } from 'lucide-react';
 
 type FormData = {
     name: string;
@@ -14,10 +13,13 @@ type FormData = {
 };
 
 const ApplicationForm: React.FC = () => {
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
+    const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
+
+    const watchedResume = watch('resume');
+    const selectedFile = watchedResume && watchedResume.length > 0 ? watchedResume[0] : null;
 
     const onSubmit = async (data: FormData) => {
         setIsSubmitting(true);
@@ -44,47 +46,23 @@ const ApplicationForm: React.FC = () => {
                 throw new Error('File size must be less than 5MB');
             }
 
-            // Upload Resume as multipart form data
-            const uploadFormData = new FormData();
-            uploadFormData.append('resume', resumeFile);
+            // Submit application as multipart form data
+            const formData = new FormData();
+            formData.append('name', data.name);
+            formData.append('email', data.email);
+            formData.append('phone', data.phone);
+            formData.append('position', data.position);
+            formData.append('message', data.message);
+            formData.append('resume', resumeFile);
+            formData.append('videoResumeLink', data.videoResumeLink || '');
 
-            // Debug: Log file info
-            console.log('Uploading file:', {
-                name: resumeFile.name,
-                size: resumeFile.size,
-                type: resumeFile.type,
-                fieldName: 'resume'
-            });
-
-            const uploadRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, {
+            const applicationRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications`, {
                 method: 'POST',
-                body: uploadFormData
+                body: formData
             });
 
-            if (!uploadRes.ok) {
-                const errorData = await uploadRes.json().catch(() => ({}));
-                throw new Error(errorData.message || 'Resume upload failed');
-            }
-
-            const uploadData = await uploadRes.json();
-            const resumeUrl = uploadData.fileUrl || uploadData.url || '';
-
-
-            // Submit application
-            const contactRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: data.name,
-                    email: data.email,
-                    phone: data.phone,
-                    subject: `Job Application: ${data.position}`,
-                    message: `${data.message}\n\nVideo Resume: ${data.videoResumeLink || 'Not provided'}\nResume: ${resumeUrl}`
-                })
-            });
-
-            if (!contactRes.ok) {
-                const errorData = await contactRes.json().catch(() => ({}));
+            if (!applicationRes.ok) {
+                const errorData = await applicationRes.json().catch(() => ({}));
                 throw new Error(errorData.message || 'Application submission failed');
             }
 
@@ -178,15 +156,31 @@ const ApplicationForm: React.FC = () => {
                         {/* Resume Upload - Smaller */}
                         <div>
                             <label className="block text-sm font-medium text-text-muted mb-2">Upload Resume (PDF/DOC)</label>
-                            <div className={`relative border-2 border-dashed ${errors.resume ? 'border-red-500' : 'border-border/50'} rounded-lg p-4 text-center hover:border-primary/50 transition-colors bg-surface/20`}>
+                            <div className={`relative border-2 border-dashed ${errors.resume ? 'border-red-500' : selectedFile ? 'border-primary' : 'border-border/50'} rounded-lg p-4 text-center hover:border-primary/50 transition-colors bg-surface/20 min-h-[100px] flex flex-col items-center justify-center`}>
                                 <input
                                     type="file"
                                     {...register('resume', { required: 'Resume is required' })}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     accept=".pdf,.doc,.docx"
                                 />
-                                <Upload className="mx-auto text-text-muted mb-1" size={20} />
-                                <p className="text-xs text-text-muted">Click or drag file to upload</p>
+                                {selectedFile ? (
+                                    <div className="flex flex-col items-center animate-in fade-in zoom-in duration-300">
+                                        <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mb-2">
+                                            <FileText className="text-primary" size={20} />
+                                        </div>
+                                        <p className="text-sm font-bold text-text truncate max-w-[200px]">
+                                            {selectedFile.name}
+                                        </p>
+                                        <p className="text-[10px] text-primary font-black uppercase tracking-widest mt-1 flex items-center gap-1">
+                                            <CheckCircle size={10} /> Ready to upload
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Upload className="mx-auto text-text-muted mb-1" size={20} />
+                                        <p className="text-xs text-text-muted">Click or drag file to upload</p>
+                                    </>
+                                )}
                             </div>
                             {errors.resume && <span className="text-red-500 text-xs mt-1 block">{errors.resume.message}</span>}
                         </div>

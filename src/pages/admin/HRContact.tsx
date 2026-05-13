@@ -1,45 +1,83 @@
 import { useState, useEffect } from 'react';
-import { Mail, Trash2, Briefcase, Search, Filter, Play, Download, CheckCircle2 } from 'lucide-react';
+import { Mail, Trash2, Briefcase, Search, Filter, Play, Download, CheckCircle2, Printer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const HRContact = () => {
-    const [messages, setMessages] = useState<any[]>([]);
+    const [contacts, setContacts] = useState<any[]>([]);
+    const [applications, setApplications] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [inboxCategory, setInboxCategory] = useState<'all' | 'inquiries' | 'applications'>('all');
 
     useEffect(() => {
-        const fetchMessages = async () => {
+        const fetchData = async () => {
             setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    const messagesArray = Array.isArray(data) ? data : (data.contacts || data.data || []);
-                    setMessages(messagesArray);
+                const headers = { Authorization: `Bearer ${token}` };
+
+                const [contactRes, appRes] = await Promise.all([
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications`, { headers })
+                ]);
+
+                if (contactRes.ok) {
+                    const data = await contactRes.json();
+                    setContacts(Array.isArray(data) ? data : (data.contacts || data.data || []));
+                }
+
+                if (appRes.ok) {
+                    const data = await appRes.json();
+                    setApplications(Array.isArray(data) ? data : (data.applications || data.data || []));
                 }
             } catch (error) {
-                console.error("Failed to fetch messages", error);
+                console.error("Failed to fetch inbox data", error);
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchMessages();
+        fetchData();
     }, []);
+    
+    const handleDownload = async (id: string, applicantName: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications/download/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (!res.ok) return false;
 
-    const filteredMessages = messages.filter(msg => {
-        const isApp = msg.subject?.toLowerCase().includes('job application');
-        if (inboxCategory === 'applications') return isApp;
-        if (inboxCategory === 'inquiries') return !isApp;
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${applicantName.replace(/\s+/g, '_')}_Resume.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            return true;
+        } catch (error) {
+            console.error("Download failed:", error);
+            return false;
+        }
+    };
+
+    const combinedMessages = [
+        ...contacts.map((c: any) => ({ ...c, modelType: 'inquiry' })),
+        ...applications.map((a: any) => ({ ...a, modelType: 'application' }))
+    ].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const filteredMessages = combinedMessages.filter(msg => {
+        if (inboxCategory === 'applications') return msg.modelType === 'application';
+        if (inboxCategory === 'inquiries') return msg.modelType === 'inquiry';
         return true;
     });
 
     const stats = {
-        total: messages.length,
-        inquiries: messages.filter(m => !m.subject?.toLowerCase().includes('job application')).length,
-        applications: messages.filter(m => m.subject?.toLowerCase().includes('job application')).length
+        total: combinedMessages.length,
+        inquiries: contacts.length,
+        applications: applications.length
     };
 
     return (
@@ -139,20 +177,32 @@ const HRContact = () => {
                                 </div>
                             ) : (
                                 filteredMessages.map((msg: any) => {
-                                    const isApp = msg.subject?.toLowerCase().includes('job application');
+                                    const isApp = msg.modelType === 'application' || msg.subject?.toLowerCase().includes('job application');
+                                    
+                                    // New model fields or legacy parsed fields
+                                    let resumeLink = msg.resumeUrl || null;
+                                    let videoLink = msg.videoResumeLink || null;
+                                    let position = msg.position || null;
+                                    let displayMessage = msg.message;
+                                    let subject = msg.subject || (position ? `Job Application: ${position}` : 'No Subject');
 
-                                    // Parsing helper
-                                    const extractLink = (text: string, label: string) => {
-                                        if (!text || !text.includes(label)) return null;
-                                        const parts = text.split(label);
-                                        if (parts.length < 2) return null;
-                                        const link = parts[1].split('\n')[0].trim();
-                                        return (link && link !== 'Not provided' && link.startsWith('http')) ? link : null;
-                                    };
+                                    // Legacy parsing if it's a legacy application in the Contact model
+                                    if (msg.modelType === 'inquiry' && isApp) {
+                                        const extractLegacyLink = (text: string, label: string) => {
+                                            if (!text || !text.includes(label)) return null;
+                                            const parts = text.split(label);
+                                            return parts[1].split('\n')[0].trim();
+                                        };
+                                        resumeLink = extractLegacyLink(msg.message, 'Resume:');
+                                        videoLink = extractLegacyLink(msg.message, 'Video Resume:');
+                                        displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
+                                    }
 
-                                    const resumeLink = extractLink(msg.message, 'Resume:');
-                                    const videoLink = extractLink(msg.message, 'Video Resume:');
-                                    const displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
+                                    // Selectively apply fl_attachment
+                                    // We can only use transformations for non-raw files (like PDFs uploaded as 'image' type via auto)
+                                    if (resumeLink && resumeLink.includes('res.cloudinary.com') && !resumeLink.includes('/raw/')) {
+                                        resumeLink = resumeLink.replace('/upload/', '/upload/fl_attachment/');
+                                    }
 
                                     return (
                                         <motion.div
@@ -169,7 +219,7 @@ const HRContact = () => {
                                                     </div>
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-3">
-                                                            <h3 className="font-black text-text text-lg tracking-tight leading-tight">{msg.subject || 'No Subject'}</h3>
+                                                            <h3 className="font-black text-text text-lg tracking-tight leading-tight">{subject}</h3>
                                                             <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${isApp ? 'bg-purple-500/10 text-purple-400' : 'bg-brand-green/10 text-brand-green'}`}>
                                                                 {isApp ? 'Application' : 'Inquiry'}
                                                             </span>
@@ -190,7 +240,7 @@ const HRContact = () => {
                                                 <div className="flex md:flex-col items-center md:items-end justify-between md:justify-start gap-4">
                                                     <span className="text-[10px] font-black text-text-muted/60 uppercase tracking-widest">{new Date(msg.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        {isApp && videoLink && (
+                                                        {isApp && videoLink && videoLink !== 'Not provided' && (
                                                             <a
                                                                 href={videoLink}
                                                                 target="_blank"
@@ -202,21 +252,24 @@ const HRContact = () => {
                                                             </a>
                                                         )}
                                                         {isApp && resumeLink && (
-                                                            <a
-                                                                href={resumeLink}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
+                                                            <button
+                                                                onClick={async () => {
+                                                                    if (msg.modelType === 'application') {
+                                                                        const success = await handleDownload(msg._id, msg.name);
+                                                                        if (!success) window.open(resumeLink, '_blank');
+                                                                    } else {
+                                                                        window.open(resumeLink, '_blank');
+                                                                    }
+                                                                }}
                                                                 className="flex items-center gap-2 px-4 py-2 bg-white/10 text-text rounded-xl text-[10px] font-black hover:bg-white/20 transition-all uppercase tracking-widest border border-white/10"
                                                             >
                                                                 <Download size={14} />
                                                                 Resume
-                                                            </a>
-                                                        )}
-                                                        {!isApp && (
-                                                            <button className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
-                                                                <Trash2 size={16} />
                                                             </button>
                                                         )}
+                                                        <button className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                                                            <Trash2 size={16} />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>

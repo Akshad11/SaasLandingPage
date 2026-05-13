@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { BarChart3, Briefcase, Users, Mail, Play, Download, Trash2, ArrowRight } from 'lucide-react';
+import { BarChart3, Briefcase, Users, Mail, Play, Download, Trash2, ArrowRight, Printer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -15,29 +15,38 @@ const HRDashboard = () => {
             setIsLoading(true);
             try {
                 const token = localStorage.getItem('token');
+                const headers = { Authorization: `Bearer ${token}` };
                 
-                // Fetch Stats
-                const jobsRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/jobs/my-jobs`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                // Fetch Stats & Data
+                const [jobsRes, contactRes, appRes] = await Promise.all([
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/jobs/my-jobs`, { headers }),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, { headers }),
+                    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications`, { headers })
+                ]);
+
                 if (jobsRes.ok) {
                     const jobsData = await jobsRes.json();
                     setStats(prev => ({ ...prev, jobs: jobsData.length }));
                 }
 
-                // Fetch Recent Activity (Messages/Applications)
-                const contactRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/contact`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                let combined: any[] = [];
                 if (contactRes.ok) {
                     const data = await contactRes.json();
-                    const messagesArray = Array.isArray(data) ? data : (data.contacts || data.data || []);
-                    setRecentActivity(messagesArray.slice(0, 3)); // Get top 3
-                    
-                    // Update application count based on subjects
-                    const appCount = messagesArray.filter((m: any) => m.subject?.toLowerCase().includes('job application')).length;
-                    setStats(prev => ({ ...prev, applications: appCount }));
+                    const contactsArr = Array.isArray(data) ? data : (data.contacts || data.data || []);
+                    combined = [...combined, ...contactsArr.map((c: any) => ({ ...c, modelType: 'inquiry' }))];
                 }
+
+                if (appRes.ok) {
+                    const data = await appRes.json();
+                    const appsArr = Array.isArray(data) ? data : (data.applications || data.data || []);
+                    combined = [...combined, ...appsArr.map((a: any) => ({ ...a, modelType: 'application' }))];
+                    setStats(prev => ({ ...prev, applications: appsArr.length }));
+                }
+
+                setRecentActivity(combined.sort((a: any, b: any) => 
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                ).slice(0, 3));
+
             } catch (error) {
                 console.error("Failed to fetch dashboard data", error);
             } finally {
@@ -47,12 +56,43 @@ const HRDashboard = () => {
         fetchData();
     }, []);
 
+    const handleDownload = async (id: string, applicantName: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/applications/download/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (!res.ok) return false;
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${applicantName.replace(/\s+/g, '_')}_Resume.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            return true;
+        } catch (error) {
+            console.error("Download failed:", error);
+            return false;
+        }
+    };
+
     // Parsing helper for application links
     const extractLink = (text: string, label: string) => {
         if (!text || !text.includes(label)) return null;
         const parts = text.split(label);
         if (parts.length < 2) return null;
-        const link = parts[1].split('\n')[0].trim();
+        let link = parts[1].split('\n')[0].trim();
+        
+        // Enhance Cloudinary links to force download
+        if (link.includes('res.cloudinary.com')) {
+            link = link.replace('/upload/', '/upload/fl_attachment/');
+        }
+        
         return (link && link !== 'Not provided' && link.startsWith('http')) ? link : null;
     };
 
@@ -113,58 +153,86 @@ const HRDashboard = () => {
                                 <p className="text-text-muted font-bold text-sm">No recent activity detected.</p>
                             </div>
                         ) : (
-                            recentActivity.map((msg, idx) => {
-                                const isApp = msg.subject?.toLowerCase().includes('job application');
-                                const resumeLink = extractLink(msg.message, 'Resume:');
-                                const videoLink = extractLink(msg.message, 'Video Resume:');
-                                const displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
+                                recentActivity.map((msg, idx) => {
+                                    const isApp = msg.modelType === 'application' || msg.subject?.toLowerCase().includes('job application');
+                                    
+                                    let resumeLink = msg.resumeUrl || null;
+                                    let videoLink = msg.videoResumeLink || null;
+                                    let position = msg.position || null;
+                                    let displayMessage = msg.message;
+                                    let subject = msg.subject || (position ? `Job Application: ${position}` : 'No Subject');
 
-                                return (
-                                    <motion.div 
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        key={msg._id} 
-                                        className="group bg-surface/40 hover:bg-surface border border-border/30 hover:border-primary/30 p-5 rounded-3xl transition-all relative overflow-hidden"
-                                    >
-                                        <div className="flex justify-between items-start relative z-10">
-                                            <div className="flex gap-4">
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isApp ? 'bg-purple-500/10 text-purple-400' : 'bg-brand-green/10 text-brand-green'}`}>
-                                                    {isApp ? <Briefcase size={22} /> : <Mail size={22} />}
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-bold text-text text-sm leading-tight line-clamp-1">{msg.subject}</h3>
-                                                    <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted mt-1">
-                                                        <span className="text-primary">{msg.name}</span>
-                                                        <span>•</span>
-                                                        <span>{new Date(msg.createdAt).toLocaleDateString()}</span>
+                                    if (msg.modelType === 'inquiry' && isApp) {
+                                        const extractLegacyLink = (text: string, label: string) => {
+                                            if (!text || !text.includes(label)) return null;
+                                            const parts = text.split(label);
+                                            return parts[1].split('\n')[0].trim();
+                                        };
+                                        resumeLink = extractLegacyLink(msg.message, 'Resume:');
+                                        videoLink = extractLegacyLink(msg.message, 'Video Resume:');
+                                        displayMessage = msg.message?.split('\n\nVideo Resume:')[0] || msg.message;
+                                    }
+
+                                    if (resumeLink && resumeLink.includes('res.cloudinary.com') && !resumeLink.includes('/raw/')) {
+                                        resumeLink = resumeLink.replace('/upload/', '/upload/fl_attachment/');
+                                    }
+
+                                    return (
+                                        <motion.div 
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            key={msg._id} 
+                                            className="group bg-surface/40 hover:bg-surface border border-border/30 hover:border-primary/30 p-5 rounded-3xl transition-all relative overflow-hidden"
+                                        >
+                                            <div className="flex justify-between items-start relative z-10">
+                                                <div className="flex gap-4">
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isApp ? 'bg-purple-500/10 text-purple-400' : 'bg-brand-green/10 text-brand-green'}`}>
+                                                        {isApp ? <Briefcase size={22} /> : <Mail size={22} />}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-text text-sm leading-tight line-clamp-1">{subject}</h3>
+                                                        <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted mt-1">
+                                                            <span className="text-primary">{msg.name}</span>
+                                                            <span>•</span>
+                                                            <span>{new Date(msg.createdAt).toLocaleDateString()}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div className="flex gap-2">
+                                                    {isApp && videoLink && videoLink !== 'Not provided' && (
+                                                        <a href={videoLink} target="_blank" rel="noopener noreferrer" className="p-2 bg-primary text-black rounded-lg hover:scale-110 transition-all">
+                                                            <Play size={14} fill="currentColor" />
+                                                        </a>
+                                                    )}
+                                                    {isApp && resumeLink && (
+                                                        <button 
+                                                            onClick={async () => {
+                                                                if (msg.modelType === 'application') {
+                                                                    const success = await handleDownload(msg._id, msg.name);
+                                                                    if (!success) window.open(resumeLink, '_blank');
+                                                                } else {
+                                                                    window.open(resumeLink, '_blank');
+                                                                }
+                                                            }}
+                                                            className="p-2 bg-white/10 text-text rounded-lg hover:bg-white/20 transition-all border border-white/10"
+                                                        >
+                                                            <Download size={14} />
+                                                        </button>
+                                                    )}
+                                                    {!isApp && (
+                                                        <button className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all">
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="flex gap-2">
-                                                {isApp && videoLink && (
-                                                    <a href={videoLink} target="_blank" rel="noopener noreferrer" className="p-2 bg-primary text-black rounded-lg hover:scale-110 transition-all">
-                                                        <Play size={14} fill="currentColor" />
-                                                    </a>
-                                                )}
-                                                {isApp && resumeLink && (
-                                                    <a href={resumeLink} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/10 text-text rounded-lg hover:bg-white/20 transition-all border border-white/10">
-                                                        <Download size={14} />
-                                                    </a>
-                                                )}
-                                                {!isApp && (
-                                                    <button className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-all">
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <p className="mt-3 text-xs text-text-muted line-clamp-2 leading-relaxed opacity-70">
-                                            {displayMessage}
-                                        </p>
-                                    </motion.div>
-                                );
-                            })
+                                            <p className="mt-3 text-xs text-text-muted line-clamp-2 leading-relaxed opacity-70">
+                                                {displayMessage}
+                                            </p>
+                                        </motion.div>
+                                    );
+                                })
                         )}
                     </div>
                 </div>
